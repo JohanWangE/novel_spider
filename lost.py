@@ -78,6 +78,7 @@ class Lost(BaseSpider):
         if not self.book:
             self.bookname = kwargs.get('bookname')
             self.url = kwargs.get('url')
+            self.category = kwargs.get("category")
         if self.config in type:
             arg = type[self.config]
             self.chapter_list = arg.get('chapter_list',None)
@@ -107,8 +108,12 @@ class Lost(BaseSpider):
             book = join(_book) or None
             log.msg("插入小说到数据库中")
             novel = Novel(name = book,author = author,spider_class = self.config,start_url = self.url,interval = 10,alias=slugify(book))
-            category = Category.objects.all()
-            novel.category = category[0]
+            if self.category:
+                category = Category.objects.get(self.category)
+                novel.category = category
+            else:
+                category = Category.objects.all()
+                novel.category = category[0]
             novel.save()
             log.msg("插入小说成功")
             self.book = novel
